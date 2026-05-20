@@ -1,23 +1,36 @@
 package processor
 
-type ram struct {
+import (
+	"sync"
+)
+
+type RAM struct {
 	memory [65536]byte
 }
 
-func InitRam() *ram {
-	return &ram{}
+var lock = &sync.Mutex{}
+var ram *RAM
+
+func GetRam() *RAM {
+	if ram == nil {
+		lock.Lock()
+		defer lock.Unlock()
+		if ram == nil {
+			ram = &RAM{}
+		}
+	}
+
+	return ram
 }
 
-func (ram *ram) ReadByte(address uint16) byte {
-	return ram.memory[address]
+func (ram *RAM) Read(address uint16) *byte {
+	return &ram.memory[address]
 }
 
-func (ram *ram) WriteByte(address uint16, value byte) {
+func (ram *RAM) Write(address uint16, value byte) {
 	ram.memory[address] = value
 }
 
-func (ram *ram) ReadWord(address uint16) uint16 {
-	lo := uint16(ram.memory[address])
-	hi := uint16(ram.memory[address+1])
-	return (hi << 8) + lo
+func (ram *RAM) WriteBlock(start_addr uint16, block []byte) {
+	// not realized
 }
