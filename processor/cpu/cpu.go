@@ -90,8 +90,8 @@ func (cpu *CPU) Reset() {
 // }
 
 func PrintCpuState(cpu *CPU) {
-	fmt.Printf("%+v\n", cpu)
-	fmt.Printf("%#08b\n", cpu.ps)
+	fmt.Printf("%+v", cpu)
+	fmt.Printf("  ps: %#08b\n", cpu.ps)
 
 }
 
@@ -122,4 +122,20 @@ func (cpu *CPU) pop() byte {
 	cpu.sp++
 	addr := 0x0100 | uint16(cpu.sp)
 	return *ram.Read(addr)
+}
+
+func (cpu *CPU) FetchByte() byte {
+	ram := ram.GetRam()
+
+	value := *ram.Read(cpu.pc)
+	cpu.pc++
+
+	return value
+}
+
+func (cpu *CPU) FetchWord() uint16 {
+	lo := uint16(cpu.FetchByte())
+	hi := uint16(cpu.FetchByte())
+
+	return lo | (hi << 8)
 }

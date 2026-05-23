@@ -4,58 +4,178 @@ import (
 	ram "NES_NEXT/processor/memory"
 )
 
-func Implied(_ uint16) *byte {
-	return nil
+type Operand struct {
+	Value *byte
+	Addr  uint16
 }
 
-func Accumulator(_ uint16) *byte {
-	return &GetCPU().a
+func Implied() Operand {
+	return Operand{}
 }
 
-func Immediate(address uint16) *byte {
+func Accumulator() Operand {
+	return Operand{
+		Value: &cpu.a,
+		Addr:  0,
+	}
+}
+
+func Absolute() Operand {
 	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchWord()
 	value := ram.Read(uint16(address))
-	return value
+
+	return Operand{
+		Value: value,
+		Addr:  address,
+	}
 }
 
-// NOT REALIZED
+func Immediate() Operand {
+	val := GetCPU().FetchByte()
 
-func Absolute(address uint16) *byte {
-	return nil
+	return Operand{
+		Value: &val,
+		Addr:  0,
+	}
 }
 
-func XIndexedAbsolute(address uint16) *byte {
-	return nil
+func XIndexedAbsolute() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchWord()
+	address += uint16(cpu.irx)
+
+	value := ram.Read(address)
+
+	return Operand{
+		Value: value,
+		Addr:  address,
+	}
 }
 
-func YIndexedAbsolute(address uint16) *byte {
-	return nil
+func YIndexedAbsolute() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchWord()
+	address += uint16(cpu.iry)
+
+	value := ram.Read(address)
+
+	return Operand{
+		Value: value,
+		Addr:  address,
+	}
 }
 
-func AbsoluteInderect(address uint16) *byte {
-	return nil
+func AbsoluteIndirect() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	ptr := cpu.FetchWord()
+
+	lo := ram.Read(ptr)
+
+	// Emulate bug
+	hiAddr := (ptr & 0xFF00) | ((ptr + 1) & 0x00FF)
+	hi := ram.Read(hiAddr)
+
+	effectiveAddress := uint16(*lo) | (uint16(*hi) << 8)
+	value := ram.Read(uint16(effectiveAddress))
+
+	return Operand{
+		Value: value,
+		Addr:  effectiveAddress,
+	}
 }
 
-func ZeroPage(address uint16) *byte {
-	return nil
+func ZeroPage() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchByte()
+	value := ram.Read(uint16(address))
+	return Operand{
+		Value: value,
+		Addr:  uint16(address),
+	}
 }
 
-func XIndexedZeroPage(address uint16) *byte {
-	return nil
+func XIndexedZeroPage() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchByte() + cpu.irx
+	value := ram.Read(uint16(address))
+
+	return Operand{
+		Value: value,
+		Addr:  uint16(address),
+	}
 }
 
-func XIndexedZeroPageInderect(address uint16) *byte {
-	return nil
+func XIndexedZeroPageIndirect() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	base := cpu.FetchByte()
+	ptr := base + cpu.irx // wrap 0xFF -> 0x00
+
+	lo := *ram.Read(uint16(ptr))
+	hi := *ram.Read(uint16(ptr + 1))
+
+	addr :=
+		uint16(lo) |
+			(uint16(hi) << 8)
+
+	return Operand{
+		Value: ram.Read(addr),
+		Addr:  addr,
+	}
 }
 
-func YIndexedZeroPage(address uint16) *byte {
-	return nil
+func YIndexedZeroPage() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	address := cpu.FetchByte() + cpu.iry
+	value := ram.Read(uint16(address))
+
+	return Operand{
+		Value: value,
+		Addr:  uint16(address),
+	}
 }
 
-func YIndexedZeroPageInderect(address uint16) *byte {
-	return nil
+func YIndexedZeroPageIndirect() Operand {
+	ram := ram.GetRam()
+	cpu := GetCPU()
+
+	base := cpu.FetchByte()
+	ptr := base + cpu.iry // wrap 0xFF -> 0x00
+
+	lo := *ram.Read(uint16(ptr))
+	hi := *ram.Read(uint16(ptr + 1))
+
+	addr :=
+		uint16(lo) |
+			(uint16(hi) << 8)
+
+	return Operand{
+		Value: ram.Read(addr),
+		Addr:  addr,
+	}
 }
 
-func Relative(address uint16) *byte {
-	return nil
+func Relative() Operand {
+	cpu := GetCPU()
+	value := cpu.FetchByte()
+	return Operand{
+		Value: &value,
+		Addr:  0,
+	}
 }
