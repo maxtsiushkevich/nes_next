@@ -85,26 +85,7 @@ func Bit(cpu *CPU, op Operand) {
 
 // Break
 func Brk(cpu *CPU, _ Operand) {
-	// Store PC to stack
-	tmp_pc := cpu.pc
-	lo := byte(tmp_pc & 0x00FF)
-	hi := byte(tmp_pc >> 8)
-	cpu.push(hi) // hi
-	cpu.push(lo) // lo
-
-	// Store flags to stack
-	var flags byte = cpu.ps
-	flags |= (1 << 5) | (1 << 4)
-	cpu.push(flags) // flags NV11DIZC
-
-	// Interrupt Disable
-	cpu.SetFlag(true, InterruptDisable)
-
-	// Transfer control to interrupt vector
-	ram := ram.GetRam()
-	lo = *ram.Read(0xFFFE)
-	hi = *ram.Read(0xFFFF)
-	cpu.pc = uint16(lo) | uint16(hi)<<8
+	cpu.Interrupt(BRK)
 }
 
 func branch(cpu *CPU, offset byte) {
@@ -321,13 +302,21 @@ func Php(cpu *CPU, _ Operand) {
 // Pull Processor Status
 func Plp(cpu *CPU, _ Operand) {
 	cpu.ps = cpu.pop()
+
+	cpu.ps |= (1 << 5)
+	cpu.ps &^= (1 << 4)
 }
 
 // Return from Interrupt
 func Rti(cpu *CPU, _ Operand) {
 	cpu.ps = cpu.pop()
+
+	cpu.ps |= (1 << 5)
+	cpu.ps &^= (1 << 4)
+
 	lo := cpu.pop()
 	hi := cpu.pop()
+
 	cpu.pc = uint16(lo) | uint16(hi)<<8
 }
 

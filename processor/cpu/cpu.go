@@ -26,6 +26,9 @@ type CPU struct {
 	// Initial state - 0b00100100
 
 	cycles byte
+
+	nmi bool
+	irq bool
 }
 
 type CpuFlag byte
@@ -56,38 +59,27 @@ func GetCPU() *CPU {
 	return cpu
 }
 
-func (cpu *CPU) Reset() {
-	cpu.a = 0
-	cpu.irx = 0
-	cpu.iry = 0
-
-	cpu.ps = 0x24
-	cpu.sp = 0xFD
-
+func (cpu *CPU) Step() {
 	ram := ram.GetRam()
-	cpu.pc = uint16(*ram.Read(0xFFFC)) |
-		uint16(*ram.Read(0xFFFD))<<8
+
+	opcode := *ram.Read(cpu.pc)
+	cpu.pc++
+
+	inst := OpcodeTable[opcode]
+
+	operand := inst.AddressingMode()
+
+	inst.Execute(cpu, operand)
+
+	// interrupt polling
+	if cpu.nmi {
+		cpu.nmi = false
+		cpu.Interrupt(NMI)
+	} else if cpu.irq {
+		cpu.irq = false
+		cpu.Interrupt(IRQ)
+	}
 }
-
-// func (cpu *CPU) Step() {
-// 	ram := ram.GetRam()
-
-// 	// Fecth opcode
-// 	opcode := *ram.Read(cpu.pc)
-// 	cpu.pc++
-
-// 	inst := OpcodeTable[opcode]
-
-// 	// Fetch operands
-// 	// PC +1 or +2
-
-// 	operand := inst.Addressing_mode(0x1100)
-
-// 	// Fetch value from memory
-
-// 	// EXECUTE
-// 	inst.Execute(cpu, operand)
-// }
 
 func PrintCpuState(cpu *CPU) {
 	fmt.Printf("%+v", cpu)
