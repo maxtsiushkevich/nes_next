@@ -1,10 +1,14 @@
-package processor
+package cpu
 
 import (
-	ram "NES_NEXT/processor/memory"
 	"fmt"
-	"sync"
 )
+
+type Memory interface {
+	Read(addr uint16) *byte
+	Write(addr uint16, value byte)
+	WriteBlock(startAddr uint16, block []byte)
+}
 
 type CPU struct {
 	pc  uint16 // Program Counter
@@ -25,6 +29,8 @@ type CPU struct {
 	// C - Carry
 	// Initial state - 0b00100100
 
+	Mem Memory
+
 	cycles byte
 
 	nmi bool
@@ -43,33 +49,43 @@ const (
 	Carry            CpuFlag = 0
 )
 
-var lock = &sync.Mutex{}
-var cpu *CPU
-
-func GetCPU() *CPU {
-	if cpu == nil {
-		lock.Lock()
-		defer lock.Unlock()
-		if cpu == nil {
-			cpu = &CPU{}
-			cpu.Reset()
-		}
+func NewCPU(mem Memory) *CPU {
+	cpu := &CPU{
+		Mem: mem,
 	}
+
+	cpu.Reset()
 
 	return cpu
 }
 
 func (cpu *CPU) Step() {
-	ram := ram.GetRam()
-
-	opcode := *ram.Read(cpu.pc)
+	opcode := *cpu.Mem.Read(cpu.pc)
 	cpu.pc++
 
-	inst := OpcodeTable[opcode]
+	inst, ok := OpcodeTable[opcode]
+	if !ok {
+		panic(fmt.Sprintf(
+			"unknown opcode %02X at %04X",
+			opcode,
+			cpu.pc,
+		))
+	}
 
-	operand := inst.AddressingMode()
+	operand := inst.AddressingMode(cpu)
 
 	inst.Execute(cpu, operand)
+
+	fmt.Printf(
+		"OPC:%02X, X:%02X Y:%02X A:%02X SP:%02X PC:%04X P:%02X\n",
+		opcode,
+		cpu.irx,
+		cpu.iry,
+		cpu.a,
+		cpu.sp,
+		cpu.pc,
+		cpu.ps,
+	)
 
 	// interrupt polling
 	if cpu.nmi {
@@ -82,8 +98,15 @@ func (cpu *CPU) Step() {
 }
 
 func PrintCpuState(cpu *CPU) {
-	fmt.Printf("%+v", cpu)
-	fmt.Printf("  ps: %#08b\n", cpu.ps)
+	fmt.Printf(
+		"PC:%04X A:%02X X:%02X Y:%02X SP:%02X P:%02X\n",
+		cpu.pc,
+		cpu.a,
+		cpu.irx,
+		cpu.iry,
+		cpu.sp,
+		cpu.ps,
+	)
 
 }
 
@@ -103,23 +126,19 @@ func (cpu *CPU) SetFlag(state bool, flag CpuFlag) {
 }
 
 func (cpu *CPU) push(value byte) {
-	ram := ram.GetRam()
 	addr := 0x0100 | uint16(cpu.sp)
-	ram.Write(addr, value)
+	cpu.Mem.Write(addr, value)
 	cpu.sp--
 }
 
 func (cpu *CPU) pop() byte {
-	ram := ram.GetRam()
 	cpu.sp++
 	addr := 0x0100 | uint16(cpu.sp)
-	return *ram.Read(addr)
+	return *cpu.Mem.Read(addr)
 }
 
 func (cpu *CPU) FetchByte() byte {
-	ram := ram.GetRam()
-
-	value := *ram.Read(cpu.pc)
+	value := *cpu.Mem.Read(cpu.pc)
 	cpu.pc++
 
 	return value

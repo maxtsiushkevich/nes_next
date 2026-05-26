@@ -1,26 +1,11 @@
-package processor
-
-import (
-	"sync"
-)
+package memory
 
 type RAM struct {
 	memory [65536]byte
 }
 
-var lock = &sync.Mutex{}
-var ram *RAM
-
-func GetRam() *RAM {
-	if ram == nil {
-		lock.Lock()
-		defer lock.Unlock()
-		if ram == nil {
-			ram = &RAM{}
-		}
-	}
-
-	return ram
+func NewRAM() *RAM {
+	return &RAM{}
 }
 
 func (ram *RAM) Read(address uint16) *byte {
@@ -31,6 +16,14 @@ func (ram *RAM) Write(address uint16, value byte) {
 	ram.memory[address] = value
 }
 
-func (ram *RAM) WriteBlock(start_addr uint16, block []byte) {
-	// not realized
+func (ram *RAM) WriteBlock(startAddr uint16, block []byte) {
+	start := int(startAddr)
+
+	if start >= len(ram.memory) {
+		return
+	}
+
+	n := min(len(block), len(ram.memory)-start)
+
+	copy(ram.memory[start:start+n], block[:n])
 }

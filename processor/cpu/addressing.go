@@ -1,31 +1,25 @@
-package processor
-
-import (
-	ram "NES_NEXT/processor/memory"
-)
+package cpu
 
 type Operand struct {
 	Value *byte
 	Addr  uint16
 }
 
-func Implied() Operand {
+func Implied(cpu *CPU) Operand {
 	return Operand{}
 }
 
-func Accumulator() Operand {
+func Accumulator(cpu *CPU) Operand {
 	return Operand{
 		Value: &cpu.a,
 		Addr:  0,
 	}
 }
 
-func Absolute() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func Absolute(cpu *CPU) Operand {
 
 	address := cpu.FetchWord()
-	value := ram.Read(uint16(address))
+	value := cpu.Mem.Read(uint16(address))
 
 	return Operand{
 		Value: value,
@@ -33,8 +27,8 @@ func Absolute() Operand {
 	}
 }
 
-func Immediate() Operand {
-	val := GetCPU().FetchByte()
+func Immediate(cpu *CPU) Operand {
+	val := cpu.FetchByte()
 
 	return Operand{
 		Value: &val,
@@ -42,14 +36,12 @@ func Immediate() Operand {
 	}
 }
 
-func XIndexedAbsolute() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func XIndexedAbsolute(cpu *CPU) Operand {
 
 	address := cpu.FetchWord()
 	address += uint16(cpu.irx)
 
-	value := ram.Read(address)
+	value := cpu.Mem.Read(address)
 
 	return Operand{
 		Value: value,
@@ -57,14 +49,11 @@ func XIndexedAbsolute() Operand {
 	}
 }
 
-func YIndexedAbsolute() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
-
+func YIndexedAbsolute(cpu *CPU) Operand {
 	address := cpu.FetchWord()
 	address += uint16(cpu.iry)
 
-	value := ram.Read(address)
+	value := cpu.Mem.Read(address)
 
 	return Operand{
 		Value: value,
@@ -72,20 +61,18 @@ func YIndexedAbsolute() Operand {
 	}
 }
 
-func AbsoluteIndirect() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func AbsoluteIndirect(cpu *CPU) Operand {
 
 	ptr := cpu.FetchWord()
 
-	lo := ram.Read(ptr)
+	lo := cpu.Mem.Read(ptr)
 
 	// Emulate bug
 	hiAddr := (ptr & 0xFF00) | ((ptr + 1) & 0x00FF)
-	hi := ram.Read(hiAddr)
+	hi := cpu.Mem.Read(hiAddr)
 
 	effectiveAddress := uint16(*lo) | (uint16(*hi) << 8)
-	value := ram.Read(uint16(effectiveAddress))
+	value := cpu.Mem.Read(uint16(effectiveAddress))
 
 	return Operand{
 		Value: value,
@@ -93,24 +80,19 @@ func AbsoluteIndirect() Operand {
 	}
 }
 
-func ZeroPage() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func ZeroPage(cpu *CPU) Operand {
 
 	address := cpu.FetchByte()
-	value := ram.Read(uint16(address))
+	value := cpu.Mem.Read(uint16(address))
 	return Operand{
 		Value: value,
 		Addr:  uint16(address),
 	}
 }
 
-func XIndexedZeroPage() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
-
+func XIndexedZeroPage(cpu *CPU) Operand {
 	address := cpu.FetchByte() + cpu.irx
-	value := ram.Read(uint16(address))
+	value := cpu.Mem.Read(uint16(address))
 
 	return Operand{
 		Value: value,
@@ -118,32 +100,25 @@ func XIndexedZeroPage() Operand {
 	}
 }
 
-func XIndexedZeroPageIndirect() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
-
+func XIndexedZeroPageIndirect(cpu *CPU) Operand {
 	base := cpu.FetchByte()
-	ptr := base + cpu.irx // wrap 0xFF -> 0x00
+	ptr := base + cpu.irx
 
-	lo := *ram.Read(uint16(ptr))
-	hi := *ram.Read(uint16(ptr + 1))
+	lo := *cpu.Mem.Read(uint16(ptr))
+	hi := *cpu.Mem.Read(uint16(byte(ptr + 1)))
 
-	addr :=
-		uint16(lo) |
-			(uint16(hi) << 8)
+	addr := uint16(lo) | (uint16(hi) << 8)
 
 	return Operand{
-		Value: ram.Read(addr),
+		Value: cpu.Mem.Read(addr),
 		Addr:  addr,
 	}
 }
 
-func YIndexedZeroPage() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func YIndexedZeroPage(cpu *CPU) Operand {
 
 	address := cpu.FetchByte() + cpu.iry
-	value := ram.Read(uint16(address))
+	value := cpu.Mem.Read(uint16(address))
 
 	return Operand{
 		Value: value,
@@ -151,28 +126,26 @@ func YIndexedZeroPage() Operand {
 	}
 }
 
-func YIndexedZeroPageIndirect() Operand {
-	ram := ram.GetRam()
-	cpu := GetCPU()
+func YIndexedZeroPageIndirect(cpu *CPU) Operand {
 
 	base := cpu.FetchByte()
-	ptr := base + cpu.iry // wrap 0xFF -> 0x00
 
-	lo := *ram.Read(uint16(ptr))
-	hi := *ram.Read(uint16(ptr + 1))
+	lo := *cpu.Mem.Read(uint16(base))
+	hi := *cpu.Mem.Read(uint16(byte(base + 1)))
 
 	addr :=
 		uint16(lo) |
 			(uint16(hi) << 8)
 
+	addr += uint16(cpu.iry)
+
 	return Operand{
-		Value: ram.Read(addr),
+		Value: cpu.Mem.Read(addr),
 		Addr:  addr,
 	}
 }
 
-func Relative() Operand {
-	cpu := GetCPU()
+func Relative(cpu *CPU) Operand {
 	value := cpu.FetchByte()
 	return Operand{
 		Value: &value,

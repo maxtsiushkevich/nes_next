@@ -1,8 +1,8 @@
-package processor
+package cpu
 
 type Instruction struct {
 	Name           string                          // Instruction name
-	AddressingMode func() Operand                  // Addressing Mode
+	AddressingMode func(cpu *CPU) Operand          // Addressing Mode
 	Length         byte                            // Length in bytes
 	Cycles         byte                            // Base cycles !!!(Additional cycles are not taken into account and are added during the execution of the opcode)
 	Execute        func(cpu *CPU, operand Operand) // Opcode handler
@@ -914,7 +914,7 @@ var OpcodeTable = map[byte]Instruction{
 	},
 	0xB4: {
 		Name:           "LDY",
-		AddressingMode: YIndexedZeroPage,
+		AddressingMode: XIndexedZeroPage,
 		Length:         2,
 		Cycles:         4,
 		Execute:        Ldy,

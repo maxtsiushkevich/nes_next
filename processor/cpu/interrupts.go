@@ -1,8 +1,4 @@
-package processor
-
-import (
-	ram "NES_NEXT/processor/memory"
-)
+package cpu
 
 type InterruptType int
 
@@ -14,12 +10,10 @@ const (
 )
 
 func (cpu *CPU) Interrupt(kind InterruptType) {
-	ram := ram.GetRam()
-
 	switch kind {
 	case RESET:
-		lo := *ram.Read(0xFFFC)
-		hi := *ram.Read(0xFFFD)
+		lo := *cpu.Mem.Read(0xFFFC)
+		hi := *cpu.Mem.Read(0xFFFD)
 
 		cpu.pc = uint16(lo) | uint16(hi)<<8
 		cpu.sp = 0xFD
@@ -67,8 +61,8 @@ func (cpu *CPU) Interrupt(kind InterruptType) {
 		vector = 0xFFFE
 	}
 
-	lo = *ram.Read(vector)
-	hi = *ram.Read(vector + 1)
+	lo = *cpu.Mem.Read(vector)
+	hi = *cpu.Mem.Read(vector + 1)
 
 	cpu.pc = uint16(lo) | uint16(hi)<<8
 }
@@ -85,6 +79,9 @@ func (cpu *CPU) Reset() {
 	cpu.a = 0
 	cpu.irx = 0
 	cpu.iry = 0
+
+	cpu.nmi = false
+	cpu.irq = false
 
 	cpu.Interrupt(RESET)
 }
