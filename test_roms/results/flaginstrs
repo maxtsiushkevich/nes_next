@@ -1,0 +1,13 @@
+a9 X=00   Y=00    A=99    SP=fd  PC=f002  C=02  P=a4
+69 X=00   Y=00    A=20    SP=fd  PC=f004  C=04  P=65
+18 X=00   Y=00    A=20    SP=fd  PC=f005  C=06  P=64 
+ea X=00   Y=00    A=20    SP=fd  PC=f006  C=08  P=64
+90 X=00   Y=00    A=20    SP=fd  PC=f00c  C=0c  P=64 
+38 X=00   Y=00    A=20    SP=fd  PC=f00d  C=0e  P=65
+ea X=00   Y=00    A=20    SP=fd  PC=f00e  C=10  P=65
+90 X=00   Y=00    A=20    SP=fd  PC=f010  C=13  P=65
+b8 X=00   Y=00    A=20    SP=fd  PC=f011  C=15  P=25
+50 X=00   Y=00    A=20    SP=fd  PC=f015  C=19  P=25
+69 X=00   Y=00    A=ce    SP=fd  PC=f017  C=1b  P=a4
+ea X=00   Y=00    A=ce    SP=fd  PC=f018  C=1d  P=a4
+85 X=00   Y=00    A=ce    SP=fd  PC=f01a  C=20  P=a4

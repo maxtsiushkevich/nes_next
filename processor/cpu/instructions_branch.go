@@ -1,9 +1,16 @@
 package cpu
 
 func branch(cpu *CPU, offset byte) {
-	rel := int8(offset)
+	oldPC := cpu.pc
+	newPC := oldPC + uint16(int8(offset))
 
-	cpu.pc = uint16(int32(cpu.pc) + int32(rel))
+	cpu.cycles++ // branch taken penalty
+
+	if pageCrossed(oldPC, newPC) {
+		cpu.cycles++ // page crossing penalty
+	}
+
+	cpu.pc = newPC
 }
 
 // Branch if Carry Clear

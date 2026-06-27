@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	memory "NES_NEXT/processor/memory"
+	ram "NES_NEXT/processor/ram"
 	"testing"
 )
 
@@ -78,12 +78,17 @@ func TestLoadOps(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
+
+			loadValAddr := uint16(0x50)
 
 			op := Operand{
 				Value: &test.loadVal,
+				Addr:  loadValAddr,
 			}
+
+			cpu.Mem.Write(loadValAddr, test.loadVal)
 
 			test.testInst(cpu, op)
 
@@ -135,7 +140,7 @@ func TestStoreOps(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
 
 			cpu.a = 0x55

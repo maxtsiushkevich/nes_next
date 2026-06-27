@@ -1,0 +1,16 @@
+a9 X=00   Y=00    A=24    SP=fd  PC=f002  С=02  P=24
+85 X=00   Y=00    A=24    SP=fd  PC=f004  С=05  P=24
+a9 X=00   Y=00    A=f0    SP=fd  PC=f006  С=07  P=a4 
+85 X=00   Y=00    A=f0    SP=fd  PC=f008  С=0a  P=a4 
+a9 X=00   Y=00    A=00    SP=fd  PC=f00a  С=0c  P=26
+09 X=00   Y=00    A=03    SP=fd  PC=f00c  С=0e  P=24
+4c X=00   Y=00    A=03    SP=fd  PC=f011  С=11  P=24
+09 X=00   Y=00    A=33    SP=fd  PC=f013  С=13  P=24
+20 X=00   Y=00    A=33    SP=fb  PC=f01d  С=19  P=24
+85 X=00   Y=00    A=33    SP=fb  PC=f01f  С=1c  P=24
+a6 X=33   Y=00    A=33    SP=fb  PC=f021  С=1f  P=24
+a9 X=33   Y=00    A=00    SP=fb  PC=f023  С=21  P=26
+60 X=33   Y=00    A=00    SP=fd  PC=f016  С=27  P=26
+09 X=33   Y=00    A=42    SP=fd  PC=f018  С=29  P=24
+6c X=33   Y=00    A=42    SP=fd  PC=f024  С=2e  P=24
+95 X=33   Y=00    A=42    SP=fd  PC=f026  С=32  P=24

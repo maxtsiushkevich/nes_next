@@ -1,0 +1,15 @@
+18 X=00   Y=00    A=00    SP=ff  PC=f001   C=02    SR=00  
+a9 X=00   Y=00    A=42    SP=ff  PC=f003   C=04    SR=00  
+90 X=00   Y=00    A=42    SP=ff  PC=f009   C=08    SR=00  
+a9 X=00   Y=00    A=f0    SP=ff  PC=f00b   C=0a    SR=80
+48 X=00   Y=00    A=f0    SP=fe  PC=f00c   C=0d    SR=80
+a9 X=00   Y=00    A=01    SP=fe  PC=f00e   C=0f    SR=00 
+48 X=00   Y=00    A=01    SP=fd  PC=f00f   C=12    SR=00 
+38 X=00   Y=00    A=01    SP=fd  PC=f010   C=14    SR=01
+08 X=00   Y=00    A=01    SP=fc  PC=f011   C=17    SR=01
+18 X=00   Y=00    A=01    SP=fc  PC=f012   C=19    SR=00 
+40 X=00   Y=00    A=01    SP=ff  PC=f001   C=1f    SR=01
+a9 X=00   Y=00    A=42    SP=ff  PC=f003   C=21    SR=01
+90 X=00   Y=00    A=42    SP=ff  PC=f005   C=24    SR=01
+85 X=00   Y=00    A=42    SP=ff  PC=f007   C=27    SR=01
+b0 X=00   Y=00    A=42    SP=ff  PC=f013   C=2a    SR=01

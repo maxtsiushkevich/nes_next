@@ -44,7 +44,6 @@ func Sbc(cpu *CPU, op Operand) {
 
 // Increment Memory
 func Inc(cpu *CPU, op Operand) {
-	// ram := ram.GetRam()
 	result := *cpu.Mem.Read(op.Addr)
 	result++
 
@@ -56,7 +55,6 @@ func Inc(cpu *CPU, op Operand) {
 
 // Decrement Memory
 func Dec(cpu *CPU, op Operand) {
-	// ram := ram.GetRam()
 	result := *cpu.Mem.Read(op.Addr)
 	result--
 

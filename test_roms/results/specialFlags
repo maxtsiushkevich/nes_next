@@ -1,0 +1,11 @@
+78 X=00   Y=00    A=00    SP=fd  PC=f001    C=02  P=24
+f8 X=00   Y=00    A=00    SP=fd  PC=f002    C=04  P=2c 
+08 X=00   Y=00    A=00    SP=fc  PC=f003    C=07  P=2c
+68 X=00   Y=00    A=3c    SP=fd  PC=f004    C=0b  P=2c
+85 X=00   Y=00    A=3c    SP=fd  PC=f006    C=0e  P=2c
+58 X=00   Y=00    A=3c    SP=fd  PC=f007    C=10  P=28
+d8 X=00   Y=00    A=3c    SP=fd  PC=f008    C=12  P=20
+08 X=00   Y=00    A=3c    SP=fc  PC=f009    C=15  P=20
+68 X=00   Y=00    A=30    SP=fd  PC=f00a    C=19  P=20
+65 X=00   Y=00    A=6c    SP=fd  PC=f00c    C=1c  P=20
+85 X=00   Y=00    A=6c    SP=fd  PC=f00e    C=1f  P=20

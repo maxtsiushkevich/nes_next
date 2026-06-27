@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	memory "NES_NEXT/processor/memory"
+	ram "NES_NEXT/processor/ram"
 	"testing"
 )
 
@@ -73,7 +73,7 @@ func TestAdc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
 
 			cpu.a = tt.a
@@ -162,7 +162,7 @@ func TestSbc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
 
 			cpu.a = tt.a
@@ -216,7 +216,7 @@ func TestInc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
 
 			addr := uint16(0x200)
@@ -265,7 +265,7 @@ func TestDec(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ram := memory.NewRAM()
+			ram := ram.NewRAM()
 			cpu := NewCPU(ram)
 
 			addr := uint16(0x200)
@@ -286,7 +286,7 @@ func TestDec(t *testing.T) {
 
 func TestInxDex(t *testing.T) {
 	t.Run("INX: wrap to zero", func(t *testing.T) {
-		ram := memory.NewRAM()
+		ram := ram.NewRAM()
 		cpu := NewCPU(ram)
 		cpu.irx = 0xFF
 
@@ -300,7 +300,7 @@ func TestInxDex(t *testing.T) {
 	})
 
 	t.Run("INX: negative", func(t *testing.T) {
-		ram := memory.NewRAM()
+		ram := ram.NewRAM()
 		cpu := NewCPU(ram)
 		cpu.irx = 0x7F
 
@@ -314,7 +314,7 @@ func TestInxDex(t *testing.T) {
 	})
 
 	t.Run("DEX: underflow", func(t *testing.T) {
-		ram := memory.NewRAM()
+		ram := ram.NewRAM()
 		cpu := NewCPU(ram)
 		cpu.irx = 0
 
@@ -330,7 +330,7 @@ func TestInxDex(t *testing.T) {
 
 func TestInyDey(t *testing.T) {
 	t.Run("INY: wrap to zero", func(t *testing.T) {
-		ram := memory.NewRAM()
+		ram := ram.NewRAM()
 		cpu := NewCPU(ram)
 		cpu.iry = 0xFF
 
@@ -344,7 +344,7 @@ func TestInyDey(t *testing.T) {
 	})
 
 	t.Run("DEY: underflow", func(t *testing.T) {
-		ram := memory.NewRAM()
+		ram := ram.NewRAM()
 		cpu := NewCPU(ram)
 		cpu.iry = 0
 

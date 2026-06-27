@@ -1,5 +1,9 @@
 package cpu
 
+func pageCrossed(a, b uint16) bool {
+	return (a & 0xFF00) != (b & 0xFF00)
+}
+
 type Operand struct {
 	Value *byte
 	Addr  uint16
@@ -11,13 +15,12 @@ func Implied(cpu *CPU) Operand {
 
 func Accumulator(cpu *CPU) Operand {
 	return Operand{
-		Value: &cpu.a,
+		Value: nil,
 		Addr:  0,
 	}
 }
 
 func Absolute(cpu *CPU) Operand {
-
 	address := cpu.FetchWord()
 	value := cpu.Mem.Read(uint16(address))
 
@@ -37,34 +40,39 @@ func Immediate(cpu *CPU) Operand {
 }
 
 func XIndexedAbsolute(cpu *CPU) Operand {
+	base := cpu.FetchWord()
+	addr := base + uint16(cpu.irx)
 
-	address := cpu.FetchWord()
-	address += uint16(cpu.irx)
+	if pageCrossed(base, addr) {
+		cpu.cycles++
+	}
 
-	value := cpu.Mem.Read(address)
+	value := cpu.Mem.Read(addr)
 
 	return Operand{
 		Value: value,
-		Addr:  address,
+		Addr:  addr,
 	}
 }
 
 func YIndexedAbsolute(cpu *CPU) Operand {
-	address := cpu.FetchWord()
-	address += uint16(cpu.iry)
+	base := cpu.FetchWord()
+	addr := base + uint16(cpu.iry)
 
-	value := cpu.Mem.Read(address)
+	if pageCrossed(base, addr) {
+		cpu.cycles++
+	}
+
+	value := cpu.Mem.Read(addr)
 
 	return Operand{
 		Value: value,
-		Addr:  address,
+		Addr:  addr,
 	}
 }
 
 func AbsoluteIndirect(cpu *CPU) Operand {
-
 	ptr := cpu.FetchWord()
-
 	lo := cpu.Mem.Read(ptr)
 
 	// Emulate bug
@@ -81,7 +89,6 @@ func AbsoluteIndirect(cpu *CPU) Operand {
 }
 
 func ZeroPage(cpu *CPU) Operand {
-
 	address := cpu.FetchByte()
 	value := cpu.Mem.Read(uint16(address))
 	return Operand{
@@ -116,7 +123,6 @@ func XIndexedZeroPageIndirect(cpu *CPU) Operand {
 }
 
 func YIndexedZeroPage(cpu *CPU) Operand {
-
 	address := cpu.FetchByte() + cpu.iry
 	value := cpu.Mem.Read(uint16(address))
 
@@ -127,17 +133,17 @@ func YIndexedZeroPage(cpu *CPU) Operand {
 }
 
 func YIndexedZeroPageIndirect(cpu *CPU) Operand {
-
 	base := cpu.FetchByte()
 
 	lo := *cpu.Mem.Read(uint16(base))
 	hi := *cpu.Mem.Read(uint16(byte(base + 1)))
 
-	addr :=
-		uint16(lo) |
-			(uint16(hi) << 8)
+	baseAddr := uint16(lo) | (uint16(hi) << 8)
+	addr := baseAddr + uint16(cpu.iry)
 
-	addr += uint16(cpu.iry)
+	if pageCrossed(baseAddr, addr) {
+		cpu.cycles++
+	}
 
 	return Operand{
 		Value: cpu.Mem.Read(addr),

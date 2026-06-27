@@ -8,6 +8,7 @@ type Memory interface {
 	Read(addr uint16) *byte
 	Write(addr uint16, value byte)
 	WriteBlock(startAddr uint16, block []byte)
+	SaveToFile()
 }
 
 type CPU struct {
@@ -31,7 +32,7 @@ type CPU struct {
 
 	Mem Memory
 
-	cycles byte
+	cycles uint64
 
 	nmi bool
 	irq bool
@@ -53,9 +54,6 @@ func NewCPU(mem Memory) *CPU {
 	cpu := &CPU{
 		Mem: mem,
 	}
-
-	cpu.Reset()
-
 	return cpu
 }
 
@@ -74,10 +72,8 @@ func (cpu *CPU) Step() {
 
 	operand := inst.AddressingMode(cpu)
 
-	inst.Execute(cpu, operand)
-
 	fmt.Printf(
-		"OPC:%02X, X:%02X Y:%02X A:%02X SP:%02X PC:%04X P:%02X\n",
+		"OPC=%02X, X=%02X Y=%02X A=%02X SP=%02X PC=%04X P=%02X C=%d\n",
 		opcode,
 		cpu.irx,
 		cpu.iry,
@@ -85,7 +81,12 @@ func (cpu *CPU) Step() {
 		cpu.sp,
 		cpu.pc,
 		cpu.ps,
+		cpu.cycles*3,
 	)
+
+	cpu.cycles += uint64(inst.Cycles)
+
+	inst.Execute(cpu, operand)
 
 	// interrupt polling
 	if cpu.nmi {
